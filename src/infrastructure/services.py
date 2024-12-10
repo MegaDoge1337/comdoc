@@ -2,19 +2,28 @@ import os
 import hashlib
 from pathlib import Path
 
-from domain.services import FilesUploadingService
+from domain.services import FilesManageService
 from domain.models import DocumentFile
 
 from fastapi import UploadFile
 
 
-class OsFileUploadingService(FilesUploadingService):
+class LocalFilesManageService(FilesManageService):
+    """
+    Service for local file management (uploading, reading and etc).
+    """
 
-    async def upload_file(self, file: UploadFile) -> DocumentFile:
+    def __init__(self):
+        local_files_dir = os.environ.get("LOCAL_FILES_DIR")
+        if not local_files_dir:
+            raise ValueError("Enviroment variable `LOCAL_FILES_DIR` not defined")
+        
+        self.local_files_dir = Path(local_files_dir)
+
+    async def save_file(self, file: UploadFile) -> DocumentFile:
         file_bytes = await file.read()
         
-        uploads_dir = Path(os.environ["UPLOADS_DIR"])
-        file_path = uploads_dir / file.filename
+        file_path = self.local_files_dir / file.filename
 
         open(file_path, "wb").write(file_bytes)
 

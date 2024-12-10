@@ -1,5 +1,5 @@
 from fastapi import FastAPI, File, UploadFile
-from .services import OsFileUploadingService
+from .services import LocalFilesManageService
 
 
 app = FastAPI()
@@ -12,6 +12,6 @@ async def ping():
 
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
-    service = OsFileUploadingService()
-    document_file = await service.upload_file(file)
+    service = LocalFilesManageService()
+    document_file = await service.save_file(file)
     return document_file
