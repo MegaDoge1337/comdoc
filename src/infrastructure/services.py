@@ -1,5 +1,4 @@
 import os
-import hashlib
 from pathlib import Path
 
 from domain.services import FilesManageService
@@ -12,7 +11,6 @@ class LocalFilesManageService(FilesManageService):
     """
     Service for local file management (uploading, reading and etc).
     """
-
     def __init__(self):
         local_files_dir = os.environ.get("LOCAL_FILES_DIR")
         if not local_files_dir:
@@ -29,8 +27,6 @@ class LocalFilesManageService(FilesManageService):
 
         document_file = DocumentFile(
             name=file.filename,
-            md5=hashlib.md5(file_bytes).hexdigest(),
-            bytes_size=int(file.size),
             path=file_path
         )
 

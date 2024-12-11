@@ -3,6 +3,16 @@ from dataclasses import dataclass
 @dataclass
 class DocumentFile:
     name: str
-    md5: str
-    bytes_size: int
     path: str
+
+@dataclass
+class Session:
+    guid: str
+
+@dataclass
+class CompareOutput:
+    messages: list[str]
+    compare_id: int
+
+    def format_message(self) -> str:
+        return "\n".join(self.messages)

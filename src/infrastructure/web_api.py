@@ -5,11 +5,6 @@ from .services import LocalFilesManageService
 app = FastAPI()
 
 
-@app.head("/")
-async def ping():
-    return None
-
-
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
     service = LocalFilesManageService()
