@@ -36,6 +36,8 @@ class FileCompareORM(Base):
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     f_file_name = Column(Text, nullable=True)
     s_file_name = Column(Text, nullable=True)
+    f_file_guid = Column(Text, nullable=True)
+    s_file_guid = Column(Text, nullable=True)
     f_file_process_id = Column(BigInteger, ForeignKey("file_process.id"), nullable=True)
     s_file_process_id = Column(BigInteger, ForeignKey("file_process.id"), nullable=True)
 
