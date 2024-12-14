@@ -1,20 +1,9 @@
-from abc import ABC, abstractmethod
-from typing import Any
+from .models import FileCompare
+from .repositories import FileCompareRepository
 
-from .models import DocumentFile, CompareOutput
-
-class FilesManageService(ABC):
-    """Service for files management"""
-    @abstractmethod
-    async def save_file(self, file: Any) -> DocumentFile:
-        pass
-
-class CompareDocumentService(ABC):
-    """Service for comparing documents"""
-    @abstractmethod
-    async def compare_documents(
-        self, 
-        first_document: Any, 
-        second_document: Any
-    ) -> CompareOutput:
-        pass
+class FileCompareService:
+    def __init__(self, file_compare_repo: FileCompareRepository):
+        self.repo = file_compare_repo
+    
+    def get_list(self) -> list[FileCompare]:
+        return self.repo.list()
