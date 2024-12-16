@@ -1,6 +1,7 @@
 import os
 import requests
 from urllib.parse import urljoin
+from typing import Any
 
 from sqlalchemy.orm import Session
 
@@ -8,8 +9,6 @@ from domain.models import FileCompare, FactInfo, Fact
 from domain.repositories import FileCompareRepository, FactExtractionRepository, FactRepository
 
 from .orm import FileCompareORM, FactExtractionORM, FactInfoORM
-
-from .dto import FactExtractionDto
 
 class SQLAlchemyFileCompareRepository(FileCompareRepository):
     def __init__(self, session: Session) -> None:
@@ -51,7 +50,7 @@ class ApiFactExtractionRepository(FactExtractionRepository):
         if not self.api_url:
             raise ValueError("Environment variable `FACT_EXTRACTION_SERVICE_URL` not defined")
     
-    def extract_facts(self, files: list[tuple[str, bytes]]) -> FactExtractionDto:
+    def extract_facts(self, files: list[tuple[str, bytes]]) -> Any:
         first_file = files[0]
         second_file = files[1]
         
@@ -67,12 +66,7 @@ class ApiFactExtractionRepository(FactExtractionRepository):
         }
 
         response = requests.post(urljoin(self.api_url, "/Upload"), files=files)
-        response_json = response.json()
-
-        return FactExtractionDto(
-            file_compare=response_json.get("file_compare"),
-            message=response_json.get("message")
-        )
+        return response.json()
 
 class SQLAlchemyFactRepository(FactRepository):
     def __init__(self, session: Session):
