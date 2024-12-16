@@ -1,9 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
-from .models import FileCompare
+from .models import FileCompare, CompareInstance
 
 class FileCompareRepository(ABC):
     @abstractmethod
     def list(self) -> list[FileCompare]:
+        pass
+
+class CompareRepository(ABC):
+    @abstractmethod
+    def compare(self, files: list[tuple[str, bytes]]) -> CompareInstance:
         pass
