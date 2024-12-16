@@ -1,14 +1,23 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from .models import FileCompare, CompareInstance
+from .models import FileCompare, Fact
 
 class FileCompareRepository(ABC):
     @abstractmethod
     def list(self) -> list[FileCompare]:
         pass
+    
+    @abstractmethod
+    def get_by_id(self, id: int) -> FileCompare:
+        pass
 
 class FactExtractionRepository(ABC):
     @abstractmethod
     def extract_facts(self, files: list[tuple[str, bytes]]) -> Any:
+        pass
+
+class FactRepository(ABC):
+    @abstractmethod
+    def list_by_id(self, file_process_id: int) -> list[Fact]:
         pass
