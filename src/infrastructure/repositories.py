@@ -4,10 +4,12 @@ from urllib.parse import urljoin
 
 from sqlalchemy.orm import Session
 
-from domain.models import FileCompare, CompareInstance
-from domain.repositories import FileCompareRepository, CompareRepository
+from domain.models import FileCompare
+from domain.repositories import FileCompareRepository, FactExtractionRepository
 
 from .orm import FileCompareORM
+
+from .dto import FactExtractionDto
 
 class SQLAlchemyFileCompareRepository(FileCompareRepository):
     def __init__(self, session: Session) -> None:
@@ -24,14 +26,14 @@ class SQLAlchemyFileCompareRepository(FileCompareRepository):
             for fc in file_compare_orm
         ]
 
-class ApiCompareRepository(CompareRepository):
+class ApiFactExtractionRepository(FactExtractionRepository):
     def __init__(self) -> None:
-        self.api_url = os.environ.get("COMPARE_SERVICE_URL")
+        self.api_url = os.environ.get("FACT_EXTRACTION_SERVICE_URL")
 
         if not self.api_url:
-            raise ValueError("Environment variable `COMPARE_SERVICE_URL` not defined")
+            raise ValueError("Environment variable `FACT_EXTRACTION_SERVICE_URL` not defined")
     
-    def compare(self, files: list[tuple[str, bytes]]):
+    def extract_facts(self, files: list[tuple[str, bytes]]) -> FactExtractionDto:
         first_file = files[0]
         second_file = files[1]
         
@@ -49,7 +51,7 @@ class ApiCompareRepository(CompareRepository):
         response = requests.post(urljoin(self.api_url, "/Upload"), files=files)
         response_json = response.json()
 
-        return CompareInstance(
-            file_compare=int(response_json.get("file_compare")),
-            message=response_json.get("message"),
+        return FactExtractionDto(
+            file_compare=response_json.get("file_compare"),
+            message=response_json.get("message")
         )

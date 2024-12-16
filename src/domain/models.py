@@ -7,8 +7,3 @@ class FileCompare:
     second_file_name: str
     first_file_guid: str
     second_file_guid: str
-
-@dataclass
-class CompareInstance:
-    file_compare: int
-    message: str
