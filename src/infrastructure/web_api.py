@@ -1,10 +1,13 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
-from domain.services import FileCompareService, FactExtractionService, FactComparatorService
+from domain.services import FileCompareService, FactExtractionService, FactComparatorService, FileProcessService
 
 from .database import SessionFactory
-from .repositories import SQLAlchemyFileCompareRepository, ApiFactExtractionRepository, SQLAlchemyFactRepository
+from .repositories import SQLAlchemyFileCompareRepository, \
+                            ApiFactExtractionRepository, \
+                            SQLAlchemyFactRepository, \
+                            SQLAlchemyFileProcessRepository
 
 app = FastAPI()
 
@@ -22,7 +25,7 @@ async def get_file_compares():
     session = SessionFactory()
     repo = SQLAlchemyFileCompareRepository(session=session)
     service = FileCompareService(file_compare_repo=repo)
-    return service.get_list()
+    return service.list()
 
 
 @app.post("/extract_facts")
@@ -46,3 +49,17 @@ async def compare_facts(file_compare_id: int):
     )
 
     return service.compare(file_compare_id)
+
+@app.get("/check_processing/{file_compare_id}")
+async def check_processing(file_compare_id: int):
+    session = SessionFactory()
+
+    file_compare_repo = SQLAlchemyFileCompareRepository(session=session)
+    file_process_repo = SQLAlchemyFileProcessRepository(session=session)
+
+    service = FileProcessService(
+        file_compare_repo=file_compare_repo,
+        file_process_repo=file_process_repo
+    )
+
+    return service.check_processing(file_compare_id)

@@ -1,7 +1,7 @@
 from typing import Any
 
 from .models import FileCompare, ComparedFact, ComapareResult
-from .repositories import FileCompareRepository, FactExtractionRepository, FactRepository
+from .repositories import FileCompareRepository, FactExtractionRepository, FactRepository, FileProcessRepository
 
 class FileCompareService:
     def __init__(self, file_compare_repo: FileCompareRepository):
@@ -60,3 +60,26 @@ class FactComparatorService:
                     result.facts.append(fact)
                     break
         return result
+
+class FileProcessService:
+    def __init__(self, file_compare_repo: FileCompareRepository,
+                 file_process_repo: FileProcessRepository):
+        self.file_compare_repo = file_compare_repo
+        self.file_process_repo = file_process_repo
+    
+    def check_processing(self, file_compare_id: int) -> bool:
+        file_compare = self.file_compare_repo.get_by_id(file_compare_id)
+        
+        if not file_compare:
+            return None
+        
+        first_file_process = self.file_process_repo.get_by_id(file_compare.first_file_proces_id)
+        second_file_process = self.file_process_repo.get_by_id(file_compare.second_file_proces_id)
+
+        is_first_file_processed = first_file_process.status == "done"
+        is_second_file_processed = second_file_process.status == "done"
+
+        return {
+            "file_compare": file_compare_id,
+            "is_done": is_first_file_processed and is_second_file_processed
+        }

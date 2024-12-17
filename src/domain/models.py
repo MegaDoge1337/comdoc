@@ -47,3 +47,7 @@ class ComapareResult:
     second_file_name: str
     second_file_guid: str
     facts: list[ComparedFact]
+
+@dataclass
+class FileProcess:
+    status: str

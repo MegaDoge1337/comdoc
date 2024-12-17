@@ -5,10 +5,10 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from domain.models import FileCompare, FactInfo, Fact
-from domain.repositories import FileCompareRepository, FactExtractionRepository, FactRepository
+from domain.models import FileCompare, FactInfo, Fact, FileProcess
+from domain.repositories import FileCompareRepository, FactExtractionRepository, FactRepository, FileProcessRepository
 
-from .orm import FileCompareORM, FactExtractionORM, FactInfoORM
+from .orm import FileCompareORM, FactExtractionORM, FactInfoORM, FileProcessORM
 
 class SQLAlchemyFileCompareRepository(FileCompareRepository):
     def __init__(self, session: Session) -> None:
@@ -102,3 +102,15 @@ class SQLAlchemyFactRepository(FactRepository):
             )
         
         return facts
+
+class SQLAlchemyFileProcessRepository(FileProcessRepository):
+    def __init__(self, session: Session):
+        self.session = session
+    
+    def get_by_id(self, file_process_id: int) -> FileProcess:
+        file_process_orm = self.session.query(FileProcessORM).filter(FileProcessORM.id == file_process_id).first()
+
+        if not file_process_orm:
+            return None
+        
+        return FileProcess(status=file_process_orm.status)
