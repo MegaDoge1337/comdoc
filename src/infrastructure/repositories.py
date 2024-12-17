@@ -85,7 +85,7 @@ class SQLAlchemyFactRepository(FactRepository):
         ]
 
         for fact in facts:
-            fact_info_orm = self.session.query(FactInfoORM).filter(FactInfoORM.id == fact.id).first()
+            fact_info_orm = self.session.query(FactInfoORM).filter(FactInfoORM.fact_extraction_id == fact.id).first()
 
             if not fact_info_orm:
                 continue

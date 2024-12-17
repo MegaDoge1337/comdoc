@@ -31,7 +31,7 @@ async def get_file_compares():
 @app.post("/extract_facts")
 async def extract_facts(files: list[UploadFile] = File(...)):
     repo = ApiFactExtractionRepository()
-    service = FactExtractionService(compare_repo=repo)
+    service = FactExtractionService(fact_extraction_repo=repo)
     uploading_files = [(f.filename, await f.read()) for f in files]
     return service.extract_facts(uploading_files)
 
