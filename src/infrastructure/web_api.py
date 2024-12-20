@@ -1,13 +1,18 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Response
 from fastapi.middleware.cors import CORSMiddleware
 
-from domain.services import FileCompareService, FactExtractionService, FactComparatorService, FileProcessService
+from domain.services import FileCompareService, \
+                            FactExtractionService, \
+                            FactComparatorService, \
+                            FileProcessService, \
+                            FileStorageService
 
 from .database import SessionFactory
 from .repositories import SQLAlchemyFileCompareRepository, \
                             ApiFactExtractionRepository, \
                             SQLAlchemyFactRepository, \
-                            SQLAlchemyFileProcessRepository
+                            SQLAlchemyFileProcessRepository, \
+                            MinioFileStorageRepository
 
 app = FastAPI()
 
@@ -63,3 +68,13 @@ async def check_processing(file_compare_id: int):
     )
 
     return service.check_processing(file_compare_id)
+
+@app.get("/view_file/{file_name}")
+async def view_file(file_name: str):
+    repo = MinioFileStorageRepository()
+    service = FileStorageService(file_storage_repo=repo)
+
+    file_bytes = service.get_by_name(file_name)
+    return Response(file_bytes, headers={
+        "Content-Disposition": f"inline; filename=\"{file_name}\""
+    }, media_type="application/pdf")

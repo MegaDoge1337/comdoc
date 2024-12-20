@@ -26,3 +26,8 @@ class FileProcessRepository(ABC):
     @abstractmethod
     def get_by_id(self, file_process_id: int) -> FileProcess:
         pass
+
+class FileStorageRepository(ABC):
+    @abstractmethod
+    def get_by_name(self, file_name: int):
+        pass

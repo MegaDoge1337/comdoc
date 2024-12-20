@@ -5,8 +5,14 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
+from minio import Minio
+
 from domain.models import FileCompare, FactInfo, Fact, FileProcess
-from domain.repositories import FileCompareRepository, FactExtractionRepository, FactRepository, FileProcessRepository
+from domain.repositories import FileCompareRepository, \
+                                FactExtractionRepository, \
+                                FactRepository, \
+                                FileProcessRepository, \
+                                FileStorageRepository
 
 from .orm import FileCompareORM, FactExtractionORM, FactInfoORM, FileProcessORM
 
@@ -114,3 +120,40 @@ class SQLAlchemyFileProcessRepository(FileProcessRepository):
             return None
         
         return FileProcess(status=file_process_orm.status)
+    
+class MinioFileStorageRepository(FileStorageRepository):
+    def __init__(self) -> None:
+        self.minio_url = os.environ.get("MINIO_URL")
+        self.secret_key = os.environ.get("MINIO_SECRET_KEY")
+        self.access_key = os.environ.get("MINIO_ACCESS_KEY")
+        self.bucket_name = os.environ.get("MINIO_BUCKET_NAME")
+
+        # Get and cast secure arg for Minio client
+        secure = os.environ.get("MINIO_SECURE")
+        if not secure:
+            raise ValueError("Environment variable `MINIO_SECURE` not defined")
+        else:
+            self.secure = secure == "True"
+
+        if not self.minio_url:
+            raise ValueError("Environment variable `MINIO_URL` not defined")
+
+        if not self.secret_key:
+            raise ValueError("Environment variable `MINIO_SECRET_KEY` not defined")
+        
+        if not self.access_key:
+            raise ValueError("Environment variable `MINIO_ACCESS_KEY` not defined")
+
+        if not self.bucket_name:
+            raise ValueError("Environment variable `MINIO_BUCKET_NAME` not defined")
+    
+    def get_by_name(self, file_name: str) -> bytes:
+        client = Minio(
+            self.minio_url, 
+            access_key=self.access_key,
+            secret_key=self.secret_key,
+            secure=self.secure
+        )
+
+        response = client.get_object(self.bucket_name, file_name)
+        return response.read()

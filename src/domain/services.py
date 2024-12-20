@@ -1,7 +1,11 @@
 from typing import Any
 
 from .models import FileCompare, ComparedFact, ComapareResult
-from .repositories import FileCompareRepository, FactExtractionRepository, FactRepository, FileProcessRepository
+from .repositories import FileCompareRepository, \
+                            FactExtractionRepository, \
+                            FactRepository, \
+                            FileProcessRepository, \
+                            FileStorageRepository
 
 class FileCompareService:
     def __init__(self, file_compare_repo: FileCompareRepository):
@@ -83,3 +87,10 @@ class FileProcessService:
             "file_compare": file_compare_id,
             "is_done": is_first_file_processed and is_second_file_processed
         }
+
+class FileStorageService:
+    def __init__(self, file_storage_repo: FileStorageRepository):
+        self.repo = file_storage_repo
+
+    def get_by_name(self, file_name: str) -> bytes:
+        return self.repo.get_by_name(file_name)
