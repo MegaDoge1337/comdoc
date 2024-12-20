@@ -5,14 +5,15 @@ from domain.services import FileCompareService, \
                             FactExtractionService, \
                             FactComparatorService, \
                             FileProcessService, \
-                            FileStorageService
+                            PdfHighlightService
 
 from .database import SessionFactory
 from .repositories import SQLAlchemyFileCompareRepository, \
                             ApiFactExtractionRepository, \
                             SQLAlchemyFactRepository, \
                             SQLAlchemyFileProcessRepository, \
-                            MinioFileStorageRepository
+                            MinioFileStorageRepository, \
+                            FitzPdfHighlightRepository
 
 app = FastAPI()
 
@@ -69,12 +70,22 @@ async def check_processing(file_compare_id: int):
 
     return service.check_processing(file_compare_id)
 
-@app.get("/view_file/{file_name}")
-async def view_file(file_name: str):
-    repo = MinioFileStorageRepository()
-    service = FileStorageService(file_storage_repo=repo)
+@app.get("/view_file/{file_compare_id}/{target}")
+async def view_file(file_compare_id: int, target: str):
+    session = SessionFactory()
 
-    file_bytes = service.get_by_name(file_name)
+    pdf_highlight_repo = FitzPdfHighlightRepository()
+    file_storage_repo = MinioFileStorageRepository()
+    file_compare_repo = SQLAlchemyFileCompareRepository(session=session)
+    fact_repo = SQLAlchemyFactRepository(session=session)
+
+    service = PdfHighlightService(pdf_highlight_repo=pdf_highlight_repo,
+                                  file_storage_repo=file_storage_repo,
+                                  file_compare_repo=file_compare_repo,
+                                  fact_repo=fact_repo)
+
+    file_bytes = service.hightlight_facts(file_compare_id, target)
+
     return Response(file_bytes, headers={
-        "Content-Disposition": f"inline; filename=\"{file_name}\""
+        "Content-Disposition": f"inline; filename=\"{target}\""
     }, media_type="application/pdf")

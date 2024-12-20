@@ -15,6 +15,7 @@ python-dotenv = "^1.0.1"
 alembic = "^1.14.0"
 requests = "^2.32.3"
 minio = "^7.2.12"
+pymupdf = "^1.25.1"
 
 
 [build-system]

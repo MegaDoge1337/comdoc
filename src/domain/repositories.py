@@ -31,3 +31,8 @@ class FileStorageRepository(ABC):
     @abstractmethod
     def get_by_name(self, file_name: int):
         pass
+
+class PdfHighlightRepository(ABC):
+    @abstractmethod
+    def highlight_facts(self, facts: list[Fact], file_bytes: bytes) -> bytes:
+        pass

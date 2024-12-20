@@ -7,12 +7,15 @@ from sqlalchemy.orm import Session
 
 from minio import Minio
 
+import fitz
+
 from domain.models import FileCompare, FactInfo, Fact, FileProcess
 from domain.repositories import FileCompareRepository, \
                                 FactExtractionRepository, \
                                 FactRepository, \
                                 FileProcessRepository, \
-                                FileStorageRepository
+                                FileStorageRepository, \
+                                PdfHighlightRepository
 
 from .orm import FileCompareORM, FactExtractionORM, FactInfoORM, FileProcessORM
 
@@ -157,3 +160,25 @@ class MinioFileStorageRepository(FileStorageRepository):
 
         response = client.get_object(self.bucket_name, file_name)
         return response.read()
+
+class FitzPdfHighlightRepository(PdfHighlightRepository):
+    def highlight_facts(self, facts: list[Fact], file_bytes: bytes) -> bytes:
+        doc = fitz.open(stream=file_bytes, filetype="pdf")
+        for fact in facts:
+            fact_info = fact.info
+
+            if not fact_info:
+                continue
+
+            page = doc[fact_info.page - 1]
+            x1 = fact_info.left
+            y1 = fact_info.top
+            x2 = fact_info.left + fact_info.width
+            y2 = fact_info.top + fact_info.height
+            highlight_color = (0, 1, 0)
+
+            highlight_rect = fitz.Rect(x1, y1, x2, y2)
+            annot = page.add_rect_annot(highlight_rect)
+            annot.set_colors(stroke=highlight_color)
+            annot.update()
+        return doc.write()
