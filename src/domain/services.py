@@ -1,6 +1,6 @@
 from typing import Any
 
-from .models import FileCompare, ComparedFact, ComapareResult, Fact
+from .models import FileCompare, ComparedFact, ComapareResult
 from .repositories import FileCompareRepository, \
                             FactExtractionRepository, \
                             FactRepository, \
@@ -125,25 +125,20 @@ class FileProcessService:
 class PdfHighlightService:
     def __init__(self, pdf_highlight_repo: PdfHighlightRepository,
                  file_storage_repo: FileStorageRepository,
-                 file_compare_repo: FileCompareRepository,
-                 fact_repo: FactRepository):
+                 file_compare_repo: FileCompareRepository):
         self.pdf_highlight_repo = pdf_highlight_repo
         self.file_storage_repo = file_storage_repo
         self.file_compare_repo = file_compare_repo
-        self.fact_repo = fact_repo
     
-    def hightlight_facts(self, file_compare_id: int, target: str) -> bytes:
+    def hightlight_facts(self, file_compare_id: int, facts: ComapareResult, target: str) -> bytes:
         file_compare = self.file_compare_repo.get_by_id(file_compare_id)
         
-        facts = None
         file_bytes = None
 
         if target == "f_file":
-            facts = self.fact_repo.list_by_id(file_compare.first_file_proces_id)
             file_bytes = self.file_storage_repo.get_by_name(file_compare.first_file_guid)
         
         if target == "s_file":
-            facts = self.fact_repo.list_by_id(file_compare.second_file_proces_id)
             file_bytes = self.file_storage_repo.get_by_name(file_compare.second_file_guid)
 
-        return self.pdf_highlight_repo.highlight_facts(facts, file_bytes)
+        return self.pdf_highlight_repo.highlight_facts(facts, file_bytes, target)

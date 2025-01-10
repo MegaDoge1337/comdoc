@@ -9,7 +9,7 @@ from minio import Minio
 
 import fitz
 
-from domain.models import FileCompare, FactInfo, Fact, FileProcess
+from domain.models import FileCompare, FactInfo, Fact, FileProcess, ComapareResult
 from domain.repositories import FileCompareRepository, \
                                 FactExtractionRepository, \
                                 FactRepository, \
@@ -162,23 +162,37 @@ class MinioFileStorageRepository(FileStorageRepository):
         return response.read()
 
 class FitzPdfHighlightRepository(PdfHighlightRepository):
-    def highlight_facts(self, facts: list[Fact], file_bytes: bytes) -> bytes:
+    def highlight_facts(self, compared_facts: ComapareResult, file_bytes: bytes, target: str) -> bytes:
         doc = fitz.open(stream=file_bytes, filetype="pdf")
-        for fact in facts:
-            fact_info = fact.info
+        for compared_fact in compared_facts.facts:
+            fact_info = None
+
+            if target == "f_file":
+                fact_info = compared_fact.f_info
+        
+            if target == "s_file":
+                fact_info = compared_fact.s_info
 
             if not fact_info:
                 continue
 
             page = doc[fact_info.page - 1]
+
+            page.remove_rotation()
+
             x1 = fact_info.left
             y1 = fact_info.top
             x2 = fact_info.left + fact_info.width
             y2 = fact_info.top + fact_info.height
-            highlight_color = (0, 1, 0)
+
+            if compared_fact.is_equals:
+                highlight_color = (0, 1, 0)
+            else:
+                highlight_color = (1, 0, 0)
 
             highlight_rect = fitz.Rect(x1, y1, x2, y2)
             annot = page.add_rect_annot(highlight_rect)
             annot.set_colors(stroke=highlight_color)
             annot.update()
+        
         return doc.write()

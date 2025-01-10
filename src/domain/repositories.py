@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from .models import FileCompare, Fact, FileProcess
+from .models import FileCompare, Fact, FileProcess, ComapareResult
 
 class FileCompareRepository(ABC):
     @abstractmethod
@@ -34,5 +34,5 @@ class FileStorageRepository(ABC):
 
 class PdfHighlightRepository(ABC):
     @abstractmethod
-    def highlight_facts(self, facts: list[Fact], file_bytes: bytes) -> bytes:
+    def highlight_facts(self, compared_facts: ComapareResult, file_bytes: bytes, target: str) -> bytes:
         pass

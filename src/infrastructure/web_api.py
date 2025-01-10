@@ -79,12 +79,17 @@ async def view_file(file_compare_id: int, target: str):
     file_compare_repo = SQLAlchemyFileCompareRepository(session=session)
     fact_repo = SQLAlchemyFactRepository(session=session)
 
-    service = PdfHighlightService(pdf_highlight_repo=pdf_highlight_repo,
-                                  file_storage_repo=file_storage_repo,
-                                  file_compare_repo=file_compare_repo,
-                                  fact_repo=fact_repo)
+    fact_comparator_service = FactComparatorService(
+        fact_repo=fact_repo,
+        file_compare_repo=file_compare_repo
+    )
 
-    file_bytes = service.hightlight_facts(file_compare_id, target)
+    pdf_highlight_service = PdfHighlightService(pdf_highlight_repo=pdf_highlight_repo,
+                                  file_storage_repo=file_storage_repo,
+                                  file_compare_repo=file_compare_repo)
+
+    facts = fact_comparator_service.compare(file_compare_id)
+    file_bytes = pdf_highlight_service.hightlight_facts(file_compare_id, facts, target)
 
     return Response(file_bytes, headers={
         "Content-Disposition": f"inline; filename=\"{target}\""
